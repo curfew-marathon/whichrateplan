@@ -35,9 +35,10 @@ put them in `local-fixtures/` (gitignored, because they contain meter IDs and us
 
 ## Dependency policy
 
-Eight direct packages, all pinned to exact versions, no Dependabot/Renovate: `pdfjs-dist` (runtime);
-`typescript`, `esbuild`, `@types/node`, `eslint`, `@eslint/js`, `typescript-eslint`, `globals` (dev).
-TypeScript is held at 6.0.x because typescript-eslint does not support 7 yet. Upgrade deliberately, when needed.
+Eight direct packages, all pinned to exact versions: `pdfjs-dist` (runtime); `typescript`, `esbuild`,
+`@types/node`, `eslint`, `@eslint/js`, `typescript-eslint`, `globals` (dev). Dependabot checks monthly and
+groups minor and patch bumps into one PR to keep the churn low. TypeScript is held at 6.0.x because
+typescript-eslint does not support 7 yet.
 
 ## Not affiliated
 

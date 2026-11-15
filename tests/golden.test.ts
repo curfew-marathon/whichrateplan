@@ -19,14 +19,14 @@ async function load(url: URL) {
   return parseWithAdapters(lines);
 }
 
-test('real 365-day PDF: parses clean and matches the Python oracle to the dollar', { skip: !existsSync(YEAR) }, async () => {
+test('real 365-day PDF: parses clean and matches the expected totals to the dollar', { skip: !existsSync(YEAR) }, async () => {
   const { adapter, result } = await load(YEAR);
   assert.equal(adapter?.id, 'alectra-pdf');
   assert.deepEqual(result.problems, []);
   assert.equal(result.records.length, 8760);
   const months = monthlyCosts(result.records, RATES_2026);
   const t = totals(months);
-  // plan_compare.py, as-is scenario, Nov 2026 rates, no EV scaling.
+  // Expected totals for this file at the Nov 2026 prices, as-is usage.
   assert.equal(Math.round(t.tou), 2422);
   assert.equal(Math.round(t.tiered), 2462);
   assert.equal(Math.round(t.ulo), 2664);
@@ -43,7 +43,7 @@ test('real May-June 2025 PDF: parses (ND hours kept as missing) and gives no sea
   assert.equal(rec.advice, 'insufficient-data');
 });
 
-// Oracle: plan_compare.py with every EV hour scaled by m and, where noted, moved overnight (no dishwasher/pool/laundry shifts).
+// Expected totals with every EV hour scaled by m and, where noted, moved overnight.
 const EV_CASES: [string, boolean, number, [number, number, number], number][] = [
   // label, overnight, scale, [tou, tiered, ulo], best-split saving in dollars
   ['1x overnight', true, 1, [2382, 2462, 2555], 5.98],
@@ -52,7 +52,7 @@ const EV_CASES: [string, boolean, number, [number, number, number], number][] = 
   ['2x left where it is', false, 2, [2794, 2946, 2909], 56.46],
 ];
 for (const [label, overnight, scale, [tou, tiered, ulo], saving] of EV_CASES) {
-  test(`real PDF, EV ${label}: matches the Python oracle`, { skip: !existsSync(YEAR) }, async () => {
+  test(`real PDF, EV ${label}: matches the expected totals`, { skip: !existsSync(YEAR) }, async () => {
     const { result } = await load(YEAR);
     const months = monthlyCosts(applyEv(result.records, { overnight, scale }), RATES_2026);
     const t = totals(months);

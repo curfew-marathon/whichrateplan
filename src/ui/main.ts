@@ -6,7 +6,7 @@ import { PLAN_IDS, PLAN_LABEL, type IntervalRecord } from '../model.ts';
 import { monthlyCosts } from '../tariff/cost.ts';
 import { CURRENT_RATES } from '../tariff/rates.ts';
 import { recommend, SEASONAL_THRESHOLD_DOLLARS } from '../recommend.ts';
-import { dollars, headline, splitText } from '../summary.ts';
+import { costNote, dollars, headline, splitText } from '../summary.ts';
 import { monthlyChart } from './chart.ts';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('./pdf.worker.min.mjs', import.meta.url).href;
@@ -58,7 +58,7 @@ function renderResults(outlet: HTMLElement, st: State) {
     h('section', { class: 'card hero' }, h('h2', {}, head.title), h('p', {}, head.detail)),
     ...(st.notes.length ? [h('section', { class: 'card warn' }, h('ul', {}, ...st.notes.map((n) => h('li', {}, n))))] : []),
     h('section', { class: 'card' }, h('h3', {}, 'What each plan would cost you'), table,
-      h('p', { class: 'fine' }, `Commodity charges only, at the prices effective ${CURRENT_RATES.effective}. Delivery, regulatory charges and tax are the same on every plan.`)),
+      h('p', { class: 'fine' }, costNote(CURRENT_RATES.effective))),
     ...split,
     h('section', { class: 'card' }, h('h3', {}, 'Month by month'), monthlyChart(months), legend),
     h('section', { class: 'card' }, h('h3', {}, 'If you switch'),

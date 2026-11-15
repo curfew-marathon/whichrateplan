@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { headline } from '../src/summary.ts';
+import { costNote, headline } from '../src/summary.ts';
 import type { Recommendation } from '../src/recommend.ts';
 
 const base: Recommendation = {
@@ -45,4 +45,12 @@ test('partial data says so instead of giving a full-year verdict', () => {
   const h = headline({ ...base, fullYear: false, monthsCovered: 2, advice: 'insufficient-data' });
   assert.ok(h.title.includes('2 months you uploaded'));
   assert.ok(h.detail.includes('12 months'));
+});
+
+// Regression: the page used to say tax is the same on every plan. HST is charged on the whole bill.
+test('the cost note does not claim tax is identical across plans, and mentions HST', () => {
+  const note = costNote('2026-11-01');
+  assert.ok(note.includes('HST'));
+  assert.ok(!/tax (is|are) the same/i.test(note));
+  assert.ok(note.includes('2026-11-01'));
 });

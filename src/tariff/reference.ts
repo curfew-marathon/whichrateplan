@@ -53,7 +53,8 @@ export function schedule(plan: TimedPlan, period: PeriodName): string[] {
   return lines;
 }
 
-const cents = (n: number): string => `${n.toFixed(1)}&nbsp;¢/kWh`;
+// The price as written in the tariff, never rounded: a whole number gets one decimal (4 -> "4.0") so the column lines up.
+const cents = (n: number): string => `${Number.isInteger(n) ? n.toFixed(1) : n}&nbsp;¢/kWh`;
 const kwh = (n: number): string => `${n.toLocaleString('en-CA')}&nbsp;kWh`;
 const attr = (s: string): string => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 

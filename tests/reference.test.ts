@@ -117,3 +117,16 @@ test('the page keeps one h1 and the elements the script needs', () => {
   for (const id of ['theme', 'drop', 'file', 'results', 'prices-note']) assert.ok(PAGE.includes(`id="${id}"`), `missing #${id}`);
   assert.ok(PAGE.includes('<script type="module" src="./main.js"></script>'));
 });
+
+// Regression: prices were rounded to one decimal, so a 12.34 cent price showed as 12.3 while the calculator charged 12.34.
+test('the rendered reference shows a price exactly as the tariff gives it, with at least one decimal', () => {
+  const t = structuredClone(TARIFF);
+  t.tou.prices.mid = 12.34;
+  t.tiered.tier2 = 9.125;
+  t.ulo.prices.ul = 4;
+  const html = renderPlanReference(t);
+  assert.ok(html.includes('12.34&nbsp;¢/kWh'));
+  assert.ok(html.includes('9.125&nbsp;¢/kWh'));
+  assert.ok(html.includes('>4.0&nbsp;¢/kWh'));
+  assert.ok(!html.includes('12.3&nbsp;'));
+});

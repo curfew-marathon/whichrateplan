@@ -1,0 +1,29 @@
+{
+  "name": "whichrateplan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Client-side comparison of Ontario Tiered / TOU / ULO price plans from an hourly usage PDF.",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/",
+    "build": "node scripts/build.ts",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.5.438"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.6",
+    "esbuild": "0.28.2",
+    "eslint": "10.15.0",
+    "globals": "17.14.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2"
+  }
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Which Rate Plan</title>
+  <meta name="description" content="Upload your Alectra hourly usage and see whether Tiered, Time-of-Use or Ultra-Low Overnight is cheapest for you. Runs in your browser.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Which Ontario electricity plan is cheapest for you?</h1>
+      <p class="lede">Upload your hourly usage and we compare Tiered, Time-of-Use and Ultra-Low Overnight on what you actually used, and tell you whether to stay put or switch with the seasons.</p>
+      <button id="theme" type="button" class="btn ghost" aria-label="Toggle dark mode">Light / dark</button>
+    </header>
+
+    <section class="card notice">
+      <h2>Alectra customers only, for now</h2>
+      <p>This works with the hourly usage PDF from Alectra. For a real answer you need <strong>a full year (12 months)</strong> of hourly data, because the best plan changes with the seasons. Request or download it from your My Alectra account, then drop the file below.</p>
+    </section>
+
+    <label id="drop" class="drop" for="file">
+      <strong>Drop your PDF here</strong>
+      <span>or choose a file</span>
+      <input id="file" type="file" accept=".pdf,.csv,application/pdf,text/csv">
+    </label>
+    <p class="fine center">Your file is read inside this page. Nothing is uploaded or stored.</p>
+
+    <div id="results" aria-live="polite"></div>
+
+    <footer>
+      <p>An independent tool, not affiliated with Alectra or the Ontario Energy Board. Prices are the OEB's, effective Nov 1, 2026. Results are estimates from your past usage, not a bill.</p>
+    </footer>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

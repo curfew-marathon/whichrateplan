@@ -28,10 +28,13 @@ Alectra hourly usage PDF. Static, no backend. Public repo: published via GitHub 
   is held at 6.0.x because typescript-eslint does not support 7. Source avoids syntax Node's type
   stripping rejects (enums, parameter properties); `erasableSyntaxOnly` enforces it.
 - **No em dashes** anywhere in code, docs or UI copy.
-- **Costs are commodity only** (delivery and HST are identical across plans). Hours are hour-ENDING in
-  the PDF: column `1:00` is the hour starting 00:00.
-- When a change touches existing behaviour, keep a test that the old behaviour still holds. When a review
-  or bug is fixed, add a regression test that fails without the fix.
+- **Costs are commodity only.** Delivery and regulatory charges are identical across plans, but HST is
+  charged on the whole bill, so it varies with the commodity charge. The plan ranking holds; after-tax
+  savings are somewhat larger than the figures shown. Hours are hour-ENDING in the PDF: column `1:00` is
+  the hour starting 00:00.
+- When a change touches existing behaviour, keep a test for the behaviour that is meant to stay the same,
+  and update the tests for anything deliberately changed. When a review or bug is fixed, add a
+  regression test that fails without the fix.
 - `tests/golden.test.ts` only runs when real PDFs are in `local-fixtures/`; otherwise it is skipped.
 - `main` is protected: open a PR, do not push directly.
 

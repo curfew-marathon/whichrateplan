@@ -64,3 +64,11 @@ test('a day with no usable overnight hours keeps its charging where it was', () 
   assert.ok(Math.abs(sum(out) - sum(recs)) < 1e-9);
   assert.equal(out[17]!.kwh, 12.5);
 });
+
+test('a short partial hour after the full-power hours still counts as part of the session', () => {
+  // 1 kWh base; 12.5 at hour 6 (full), then 3.0 at hour 7 (2 kWh above base: the tail of the session).
+  const ev = detectEv(day(1, base({ 6: 12.5, 7: 3 })));
+  assert.ok(Math.abs(ev[6]! - 11.5) < 1e-9);
+  assert.ok(Math.abs(ev[7]! - 2) < 1e-9);
+  assert.equal(ev[8], 0);
+});

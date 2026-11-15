@@ -19,3 +19,8 @@ test('bad header, bad timestamp and negative kWh are reported', () => {
   assert.ok(fromCsv(`${CSV_HEADER}\nnope,1,ok\n`).problems[0]?.includes('interval_start'));
   assert.ok(fromCsv(`${CSV_HEADER}\n2025-11-01T00:00,-1,ok\n`).problems[0]?.includes('kwh'));
 });
+
+test('an empty timestamp and a row with no kWh column are handled', () => {
+  assert.ok(fromCsv(`${CSV_HEADER}\n,1,ok\n`).problems[0]?.includes('interval_start'));
+  assert.deepEqual(fromCsv(`${CSV_HEADER}\n2025-11-01T00:00\n`).records, [{ start: '2025-11-01T00:00', kwh: null }]);
+});

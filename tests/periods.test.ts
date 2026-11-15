@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { periodOf } from '../src/tariff/periods.ts';
+import { periodOf as period } from '../src/tariff/periods.ts';
+import { TARIFF } from './helpers/tariff.ts';
+
+const periodOf = (plan: 'tou' | 'ulo', y: number, m: number, d: number, h: number) => period(TARIFF, plan, y, m, d, h);
 
 // 2026-11-11 is a Wednesday (winter); 2026-07-15 is a Wednesday (summer); 2026-07-18 is a Saturday.
 test('TOU winter weekday: on 7-11 and 17-19, mid 11-17, off 19-7', () => {

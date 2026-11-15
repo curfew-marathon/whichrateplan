@@ -7,14 +7,16 @@ Alectra hourly usage PDF. Static, no backend. Public repo: published via GitHub 
 
     npm ci
     npm run check      # typecheck + lint + tests; run before every commit
-    npm test           # node:test with built-in TypeScript type stripping
+    npm test           # node:test; fails if line, branch or function coverage of src/ (UI excluded) is under 99%
     npm run build      # esbuild -> dist/
 
 ## Layout
 
     src/adapters/   one adapter per utility (detect + parse text lines); register in adapters/index.ts
     src/pdfText.ts  pdf.js -> text lines (loader is injected so tests run under Node)
-    src/tariff/     rates.ts (update every Nov 1), holidays.ts (computed, no yearly list), periods.ts, cost.ts
+    data/tariffs/   the OEB prices and hours as YAML (update every Nov 1; see README)
+    src/tariff/     tariff.ts (validates the YAML), current.ts (which file is live), holidays.ts (computed),
+                    periods.ts, cost.ts
     src/recommend.ts, summary.ts   plan totals, seasonal split, plain-language headline
     src/ev.ts       EV charging detection/shifting; tested but not wired into the UI right now
     src/ui/         vanilla DOM + CSS tokens, no framework

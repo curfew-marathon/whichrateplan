@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { costNote, headline } from '../src/summary.ts';
+import { costNote, headline, splitText } from '../src/summary.ts';
 import type { Recommendation } from '../src/recommend.ts';
 
 const base: Recommendation = {
@@ -49,8 +49,18 @@ test('partial data says so instead of giving a full-year verdict', () => {
 
 // Regression: the page used to say tax is the same on every plan. HST is charged on the whole bill.
 test('the cost note does not claim tax is identical across plans, and mentions HST', () => {
-  const note = costNote('2026-11-01');
+  const note = costNote('2026-11-01', '2026-11-11');
   assert.ok(note.includes('HST'));
   assert.ok(!/tax (is|are) the same/i.test(note));
-  assert.ok(note.includes('2026-11-01'));
+  assert.ok(note.includes('effective 2026-11-01') && note.includes('checked 2026-11-11'));
+});
+
+test('a one-month window reads "Jul", not "Jul-Jul"', () => {
+  const text = splitText({ inside: 'ulo', outside: 'tou', window: ['Jul'], outsideMonths: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], total: 1, saving: 1, worthIt: true });
+  assert.equal(text, 'Ultra-Low Overnight Jul, Time-of-Use Aug\u2013Jun');
+});
+
+test('a single uploaded month is "1 month", not "1 months"', () => {
+  const h = headline({ ...base, fullYear: false, monthsCovered: 1, advice: 'insufficient-data' });
+  assert.ok(h.title.includes('the 1 month you uploaded'));
 });

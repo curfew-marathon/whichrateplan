@@ -7,7 +7,7 @@ import { extractLines, type PdfLoader } from '../src/pdfText.ts';
 import { parseWithAdapters } from '../src/adapters/index.ts';
 import { monthlyCosts, totals } from '../src/tariff/cost.ts';
 import { recommend } from '../src/recommend.ts';
-import { RATES_2026 } from '../src/tariff/rates.ts';
+import { TARIFF } from './helpers/tariff.ts';
 import { applyEv } from '../src/ev.ts';
 
 const loader = getDocument as unknown as PdfLoader;
@@ -24,7 +24,7 @@ test('real 365-day PDF: parses clean and matches the expected totals to the doll
   assert.equal(adapter?.id, 'alectra-pdf');
   assert.deepEqual(result.problems, []);
   assert.equal(result.records.length, 8760);
-  const months = monthlyCosts(result.records, RATES_2026);
+  const months = monthlyCosts(result.records, TARIFF);
   const t = totals(months);
   // Expected totals for this file at the Nov 2026 prices, as-is usage.
   assert.equal(Math.round(t.tou), 2422);
@@ -39,7 +39,7 @@ test('real May-June 2025 PDF: parses (ND hours kept as missing) and gives no sea
   assert.deepEqual(result.problems, []);
   assert.ok(result.records.some((r) => r.kwh === null), 'expected ND hours on 12-May-25');
   assert.ok(result.notes.some((n) => n.includes('no data')));
-  const rec = recommend(monthlyCosts(result.records, RATES_2026));
+  const rec = recommend(monthlyCosts(result.records, TARIFF));
   assert.equal(rec.advice, 'insufficient-data');
 });
 
@@ -54,7 +54,7 @@ const EV_CASES: [string, boolean, number, [number, number, number], number][] = 
 for (const [label, overnight, scale, [tou, tiered, ulo], saving] of EV_CASES) {
   test(`real PDF, EV ${label}: matches the expected totals`, { skip: !existsSync(YEAR) }, async () => {
     const { result } = await load(YEAR);
-    const months = monthlyCosts(applyEv(result.records, { overnight, scale }), RATES_2026);
+    const months = monthlyCosts(applyEv(result.records, { overnight, scale }), TARIFF);
     const t = totals(months);
     assert.deepEqual([Math.round(t.tou), Math.round(t.tiered), Math.round(t.ulo)], [tou, tiered, ulo]);
     assert.ok(Math.abs((recommend(months).seasonal?.saving ?? 0) - saving) < 0.5, `split saving ${recommend(months).seasonal?.saving} vs ${saving}`);

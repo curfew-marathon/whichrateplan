@@ -17,7 +17,7 @@ export function fromCsv(text: string): { records: IntervalRecord[]; problems: st
   lines.slice(1).forEach((line, i) => {
     const [start, kwh] = line.split(',');
     if (!start || !/^\d{4}-\d{2}-\d{2}T\d{2}:00$/.test(start)) {
-      problems.push(`row ${i + 2}: bad interval_start "${start ?? ''}"`);
+      problems.push(`row ${i + 2}: bad interval_start "${start}"`);
       return;
     }
     if (kwh === undefined || kwh === '') return void records.push({ start, kwh: null });

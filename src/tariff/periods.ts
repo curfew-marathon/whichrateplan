@@ -1,27 +1,21 @@
-import type { PlanId } from '../model.ts';
+import type { PeriodName, Tariff } from './tariff.ts';
 import { isHoliday } from './holidays.ts';
 
-export type Period = 'on' | 'mid' | 'off' | 'ul';
+export type Period = PeriodName;
 
-const isSummer = (m: number) => m >= 5 && m <= 10;
-
-/** Weekend or statutory holiday: priced at the lowest non-overnight rate all day. */
+/** Weekend or statutory holiday: priced from the plan's weekend_holiday table. */
 export function isOffDay(y: number, m: number, d: number): boolean {
   const w = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
   return w === 0 || w === 6 || isHoliday(y, m, d);
 }
 
-/** Price period of the hour starting at `h` (0-23). Tiered has no periods. */
-export function periodOf(plan: 'tou', y: number, m: number, d: number, h: number): 'on' | 'mid' | 'off';
-export function periodOf(plan: 'ulo', y: number, m: number, d: number, h: number): Period;
-export function periodOf(plan: Exclude<PlanId, 'tiered'>, y: number, m: number, d: number, h: number): Period {
-  const offDay = isOffDay(y, m, d);
-  if (plan === 'tou') {
-    if (offDay || h >= 19 || h < 7) return 'off';
-    const busy = isSummer(m) ? h >= 11 && h < 17 : (h >= 7 && h < 11) || (h >= 17 && h < 19);
-    return busy ? 'on' : 'mid';
-  }
-  if (h >= 23 || h < 7) return 'ul';
-  if (offDay) return 'off';
-  return h >= 16 && h < 21 ? 'on' : 'mid';
+export function isSummer(t: Tariff, month: number): boolean {
+  return month >= t.summerMonths[0] && month <= t.summerMonths[1];
+}
+
+/** Price period of the hour starting at `h` (0-23), read from the tariff's hour tables. */
+export function periodOf(t: Tariff, plan: 'tou' | 'ulo', y: number, m: number, d: number, h: number): Period {
+  const p = t[plan];
+  if (isOffDay(y, m, d)) return p.weekendHoliday[h]!;
+  return (isSummer(t, m) ? p.weekday.summer : p.weekday.winter)[h]!;
 }

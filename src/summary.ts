@@ -36,6 +36,6 @@ export function headline(r: Recommendation): { title: string; detail: string } {
 }
 
 /** What the cost figures do and do not include. HST is on the whole bill, so it differs by plan. */
-export function costNote(effective: string): string {
-  return `Commodity charges only, at the prices effective ${effective}. Delivery and regulatory charges are the same on every plan. HST is charged on the whole bill, so your after-tax saving is a little larger than shown.`;
+export function costNote(effective: string, verified: string): string {
+  return `Commodity charges only, at the prices effective ${effective} (checked ${verified}). Delivery and regulatory charges are the same on every plan. HST is charged on the whole bill, so your after-tax saving is a little larger than shown.`;
 }

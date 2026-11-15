@@ -27,7 +27,7 @@ export async function extractLines(data: Uint8Array, getDocument: PdfLoader): Pr
     const items = (content.items as TextItemLike[]).filter((i) => typeof i.str === 'string' && i.str.trim() !== '');
     const rows: { y: number; parts: { x: number; s: string }[] }[] = [];
     for (const it of items) {
-      const x = it.transform[4] ?? 0, y = it.transform[5] ?? 0;
+      const x = it.transform[4]!, y = it.transform[5]!;
       const row = rows.find((r) => Math.abs(r.y - y) <= Y_TOLERANCE);
       if (row) row.parts.push({ x, s: it.str });
       else rows.push({ y, parts: [{ x, s: it.str }] });

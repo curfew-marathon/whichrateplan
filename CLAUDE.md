@@ -32,8 +32,7 @@ Alectra hourly usage PDF. Static, no backend. Public repo: published via GitHub 
   the PDF: column `1:00` is the hour starting 00:00.
 - When a change touches existing behaviour, keep a test that the old behaviour still holds. When a review
   or bug is fixed, add a regression test that fails without the fix.
-- `tests/golden.test.ts` checks the engine against totals cross-checked with an independent reference
-  implementation. It only runs when real PDFs are in `local-fixtures/`; otherwise it is skipped.
+- `tests/golden.test.ts` only runs when real PDFs are in `local-fixtures/`; otherwise it is skipped.
 - `main` is protected: open a PR, do not push directly.
 
 ## Adding a utility

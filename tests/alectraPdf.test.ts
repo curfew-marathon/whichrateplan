@@ -45,7 +45,7 @@ test('a 25-value row is reported, not accepted', () => {
   assert.ok(parseAlectraLines([bad]).problems.some((p) => p.startsWith('unparsed row')));
 });
 
-// Regression: 31-Feb crashed the Python parser with an uncaught ValueError.
+// Regression: an impossible date like 31-Feb must be reported, not crash the parser.
 test('an impossible calendar date is a problem, not an exception', () => {
   const bad = row(2025, 2, 31, flat(1));
   assert.ok(parseAlectraLines([bad]).problems.some((p) => p.startsWith('unparsed row')));

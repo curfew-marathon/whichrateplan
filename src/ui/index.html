@@ -1,20 +1,45 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-CA">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Which Rate Plan</title>
-  <meta name="description" content="Upload your Alectra hourly usage and see whether Tiered, Time-of-Use or Ultra-Low Overnight is cheapest for you. Runs in your browser.">
+  <title>Ontario TOU vs Tiered vs ULO: Which Rate Plan Is Cheapest?</title>
+  <meta name="description" content="Compare Ontario's Tiered, Time-of-Use and Ultra-Low Overnight electricity plans on your own Alectra hourly usage. Free, and your file never leaves your browser.">
+  <link rel="canonical" href="https://curfew-marathon.github.io/whichrateplan/">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Which Rate Plan">
+  <meta property="og:locale" content="en_CA">
+  <meta property="og:url" content="https://curfew-marathon.github.io/whichrateplan/">
+  <meta property="og:title" content="Which Ontario electricity plan is cheapest for you?">
+  <meta property="og:description" content="Compare Tiered, Time-of-Use and Ultra-Low Overnight on your own Alectra hourly usage. Free, and your file never leaves your browser.">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Which Rate Plan",
+    "url": "https://curfew-marathon.github.io/whichrateplan/",
+    "description": "Compares Ontario's Tiered, Time-of-Use and Ultra-Low Overnight electricity price plans on a household's own hourly usage from Alectra. Runs entirely in the browser.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "inLanguage": "en-CA",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
+    "areaServed": { "@type": "AdministrativeArea", "name": "Ontario, Canada" }
+  }
+  </script>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Which Ontario electricity plan is cheapest for you?</h1>
-      <p class="lede">Upload your hourly usage and we compare Tiered, Time-of-Use and Ultra-Low Overnight on what you actually used, and tell you whether to stay put or switch with the seasons.</p>
-      <button id="theme" type="button" class="btn ghost" aria-label="Toggle dark mode">Light / dark</button>
-    </header>
+  <header>
+    <h1>Which Ontario electricity plan is cheapest for you?</h1>
+    <p class="lede">Upload your hourly usage and we compare Tiered, Time-of-Use and Ultra-Low Overnight on what you actually used, and tell you whether to stay put or switch with the seasons.</p>
+    <button id="theme" type="button" class="btn ghost" aria-label="Toggle dark mode">Light / dark</button>
+  </header>
 
+  <main>
     <section class="card notice">
       <h2>Alectra customers only, for now</h2>
       <p>This works with the hourly usage PDF from Alectra. For a real answer you need <strong>a full year (12 months)</strong> of hourly data, because the best plan changes with the seasons. Request or download it from your My Alectra account, then drop the file below.</p>
@@ -29,10 +54,32 @@
 
     <div id="results" aria-live="polite"></div>
 
-    <footer>
-      <p>An independent tool, not affiliated with Alectra or the Ontario Energy Board. <span id="prices-note"></span> Results are estimates from your past usage, not a bill.</p>
-    </footer>
+    <section class="card reference">
+      <h2>How Ontario's three electricity price plans work</h2>
+      <p>Ontario households on the Regulated Price Plan pay electricity prices set by the Ontario Energy Board, and can choose how those prices are applied. Time-of-Use and Ultra-Low Overnight charge by the hour of the day; Tiered charges by how much you use in a month. Which one is cheapest depends on when you use power, not only on how much.</p>
+      <!-- plan-reference -->
+    </section>
+
+    <section class="card reference">
+      <h2>Common questions</h2>
+      <h3>Who is Ultra-Low Overnight good for?</h3>
+      <p>Households that can move a lot of their use into the overnight hours, such as charging an electric vehicle or running electric heating on a timer. The catch is the weekday evening on-peak price, which is far higher than anything on Time-of-Use, so cooking, laundry and air conditioning in the early evening cost more.</p>
+      <h3>Is Tiered ever the cheapest plan?</h3>
+      <p>It can be. Tiered ignores the clock, so it suits homes that use most of their power on weekday daytimes and stay under the monthly threshold. Larger users pay the higher tier on everything above the threshold.</p>
+      <h3>Why do I need a full year of hourly usage?</h3>
+      <p>The peak hours and the Tiered threshold both change between summer and winter, and so does your usage once heating or air conditioning comes on. A few months of data can point to a plan that loses over the whole year.</p>
+      <h3>How do I switch plans?</h3>
+      <p>Ask your utility. Alectra customers can submit a rate option change through their online account or by form, and the new plan applies from a later billing period, not right away.</p>
+      <h3>Do the results include delivery charges and tax?</h3>
+      <p>No. The comparison covers the electricity charge only. Delivery and regulatory charges are the same on every plan, so they do not change which plan wins. HST is charged on the whole bill, so your savings after tax are somewhat larger than the figures shown.</p>
+      <h3>Is my usage data uploaded anywhere?</h3>
+      <p>No. The file is read by your browser on your own device. There is no server behind this page, and nothing is sent or stored.</p>
+    </section>
   </main>
+
+  <footer>
+    <p>An independent tool, not affiliated with Alectra or the Ontario Energy Board. <span id="prices-note"></span> Results are estimates from your past usage, not a bill.</p>
+  </footer>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

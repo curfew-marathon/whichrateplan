@@ -16,7 +16,7 @@ Alectra hourly usage PDF. Static, no backend. Public repo: published via GitHub 
     src/pdfText.ts  pdf.js -> text lines (loader is injected so tests run under Node)
     data/tariffs/   the OEB prices and hours as YAML (update every Nov 1; see README)
     src/tariff/     tariff.ts (validates the YAML), current.ts (which file is live), holidays.ts (computed),
-                    periods.ts, cost.ts
+                    periods.ts, cost.ts, reference.ts (price tables injected into index.html at build)
     src/recommend.ts, summary.ts   plan totals, seasonal split, plain-language headline
     src/ev.ts       EV charging detection/shifting; tested but not wired into the UI right now
     src/ui/         vanilla DOM + CSS tokens, no framework

@@ -30,6 +30,14 @@ them, and point `src/tariff/current.ts` at the new file. The tests validate the 
 with no overlap, every period has a price, dates are real), and the page warns visitors once a Nov 1
 passes without a newer file. Statutory holidays are computed from the OEB's rules and need no update.
 
+The price tables on the page are generated from the same file at build time (`src/tariff/reference.ts`),
+so they follow automatically.
+
+## Search and sharing
+
+`src/ui/index.html` carries the title, description, canonical URL, Open Graph tags and a JSON-LD block.
+The canonical and `og:url` are the GitHub Pages address; change them there if the site ever moves.
+
 ## Tests and real data
 
 Unit tests use synthetic rows and a hand-built PDF. `tests/golden.test.ts` runs against real PDFs if you

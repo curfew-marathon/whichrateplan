@@ -11,8 +11,7 @@
   :root:not([data-theme="light"]) { --bg: #0e1116; --surface: #171b22; --text: rgba(255,255,255,.95); --text-2: rgba(226,232,245,.7); --hairline: rgba(255,255,255,.1); --accent: #4b9bff; --on-accent: #06182f; --warn-bg: #2b2412; --err-bg: #2d1816; --c-tiered: #9aa5b1; --c-tou: #4b9bff; --c-ulo: #f2a83a; }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
-main { max-width: 760px; margin: 0 auto; padding: var(--sp-8) var(--sp-4) 4rem; }
+body { max-width: 760px; margin: 0 auto; padding: var(--sp-8) var(--sp-4) 4rem; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
 header { position: relative; margin-bottom: var(--sp-6); }
 h1 { font-size: clamp(1.75rem, 5vw, 2.4rem); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 var(--sp-3); padding-right: 6rem; }
 h2 { font-size: 1.25rem; margin: 0 0 var(--sp-2); letter-spacing: -.01em; } h3 { font-size: 1.05rem; margin: 0 0 var(--sp-3); }
@@ -21,6 +20,10 @@ h2 { font-size: 1.25rem; margin: 0 0 var(--sp-2); letter-spacing: -.01em; } h3 {
 .card.hero { border-color: var(--accent); } .card.hero h2 { font-size: 1.5rem; } .card.hero p { margin: 0; color: var(--text-2); }
 .card.warn { background: var(--warn-bg); } .card.error { background: var(--err-bg); } .card ul { margin: 0; padding-left: 1.2rem; }
 .notice p { margin: 0; color: var(--text-2); }
+.reference { margin-top: var(--sp-8); } .reference + .reference { margin-top: 0; }
+.reference p { margin: 0 0 var(--sp-3); color: var(--text-2); } .reference p:last-child { margin-bottom: 0; }
+.reference h3 { margin: var(--sp-6) 0 var(--sp-2); } .reference table { margin-bottom: var(--sp-3); } .reference th { vertical-align: top; padding-right: var(--sp-3); }
+.reference tbody th { font-weight: 600; } .reference td.num { white-space: nowrap; padding-left: var(--sp-3); } .reference a { color: var(--accent); }
 .drop { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: 2.5rem var(--sp-4); border: 2px dashed var(--hairline); border-radius: var(--r-lg); background: var(--surface); cursor: pointer; text-align: center; transition: transform .15s var(--ease), border-color .15s var(--ease); }
 .drop:hover, .drop.over, .drop:focus-within { border-color: var(--accent); } .drop:active { transform: scale(.985); }
 .drop span { color: var(--text-2); } .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }

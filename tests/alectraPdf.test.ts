@@ -86,3 +86,8 @@ test('an unsupported file is rejected by the adapter registry with a plain messa
   assert.equal(adapter, null);
   assert.ok(result.problems[0]?.includes('only the Alectra'));
 });
+
+test('an unknown month name in the date column is reported, not guessed', () => {
+  const bad = row(2025, 5, 12, flat(1)).replace('12-May-25', '12-Foo-25');
+  assert.ok(parseAlectraLines([bad]).problems.some((p) => p.startsWith('unparsed row')));
+});

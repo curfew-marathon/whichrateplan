@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { IntervalRecord } from '../src/model.ts';
 import { monthlyCosts, tieredCost } from '../src/tariff/cost.ts';
-import { RATES_2026 } from '../src/tariff/rates.ts';
+import { TARIFF } from './helpers/tariff.ts';
 
 const near = (a: number, b: number, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
@@ -19,23 +19,23 @@ function flatMonth(y: number, m: number, kwhPerHour: number): IntervalRecord[] {
 }
 
 test('Tiered: winter threshold 1000, tier 1 below it and tier 2 above', () => {
-  near(tieredCost(800, 1, 1, RATES_2026), 800 * 0.112);
-  near(tieredCost(1500, 1, 1, RATES_2026), 1000 * 0.112 + 500 * 0.132);
+  near(tieredCost(800, 1, 1, TARIFF), 800 * 0.112);
+  near(tieredCost(1500, 1, 1, TARIFF), 1000 * 0.112 + 500 * 0.132);
 });
 
 test('Tiered: summer threshold is 600, not 1000', () => {
-  near(tieredCost(1000, 7, 1, RATES_2026), 600 * 0.112 + 400 * 0.132);
+  near(tieredCost(1000, 7, 1, TARIFF), 600 * 0.112 + 400 * 0.132);
 });
 
 test('Tiered threshold scales with data coverage so a partial month is not under-billed', () => {
   // Half the month present, 500 kWh: threshold 500 in winter, so all of it is tier 1.
-  near(tieredCost(500, 1, 0.5, RATES_2026), 500 * 0.112);
-  near(tieredCost(600, 1, 0.5, RATES_2026), 500 * 0.112 + 100 * 0.132);
+  near(tieredCost(500, 1, 0.5, TARIFF), 500 * 0.112);
+  near(tieredCost(600, 1, 0.5, TARIFF), 500 * 0.112 + 100 * 0.132);
 });
 
 test('flat 1 kWh/hour in a winter month: TOU and ULO match a hand calculation', () => {
   // January 2026: Thu Jan 1 is a holiday. Weekday TOU hours: on 6 (7-11, 17-19), mid 6, off 12.
-  const [jan] = monthlyCosts(flatMonth(2026, 1, 1), RATES_2026);
+  const [jan] = monthlyCosts(flatMonth(2026, 1, 1), TARIFF);
   // Jan 2026: 31 days, 8 weekend days (3,4,10,11,17,18,24,25,31 -> 9), 1 holiday (Jan 1) => 10 off-days, 21 weekdays.
   const weekdays = 21, offDays = 10;
   const tou = weekdays * (6 * 18.9 + 6 * 14.6 + 12 * 9.1) / 100 + offDays * 24 * 9.1 / 100;
@@ -47,7 +47,7 @@ test('flat 1 kWh/hour in a winter month: TOU and ULO match a hand calculation', 
 
 test('missing hours (null) are left out of cost and reduce coverage', () => {
   const recs = flatMonth(2026, 1, 1).map((r, i) => (i < 372 ? { ...r, kwh: null } : r));
-  const [jan] = monthlyCosts(recs, RATES_2026);
+  const [jan] = monthlyCosts(recs, TARIFF);
   assert.equal(jan!.kwh, 372);
   near(jan!.coverage, 0.5);
 });

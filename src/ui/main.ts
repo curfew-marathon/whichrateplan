@@ -4,7 +4,8 @@ import { parseWithAdapters } from '../adapters/index.ts';
 import { fromCsv, toCsv } from '../csv.ts';
 import { PLAN_IDS, PLAN_LABEL, type IntervalRecord } from '../model.ts';
 import { monthlyCosts } from '../tariff/cost.ts';
-import { CURRENT_RATES } from '../tariff/rates.ts';
+import { CURRENT_TARIFF } from '../tariff/current.ts';
+import { isStale } from '../tariff/tariff.ts';
 import { recommend, SEASONAL_THRESHOLD_DOLLARS } from '../recommend.ts';
 import { costNote, dollars, headline, splitText } from '../summary.ts';
 import { monthlyChart } from './chart.ts';
@@ -28,7 +29,7 @@ function showMessage(kind: 'error' | 'warn', title: string, lines: string[]) {
 interface State { records: IntervalRecord[]; notes: string[]; cutoff: number }
 
 function renderResults(outlet: HTMLElement, st: State) {
-  const months = monthlyCosts(st.records, CURRENT_RATES);
+  const months = monthlyCosts(st.records, CURRENT_TARIFF);
   const rec = recommend(months, st.cutoff);
   const head = headline(rec);
 
@@ -54,11 +55,15 @@ function renderResults(outlet: HTMLElement, st: State) {
           rec.seasonal.worthIt ? `That clears your ${dollars(rec.threshold)} cutoff.` : `That is under your ${dollars(rec.threshold)} cutoff, so we suggest staying put.`))]
     : [];
 
+  const stale = isStale(CURRENT_TARIFF, new Date().toISOString().slice(0, 10))
+    ? [h('section', { class: 'card warn' }, h('p', {}, `These prices took effect ${CURRENT_TARIFF.effective} and the Ontario Energy Board resets them every Nov 1, so they may be out of date. Check `, h('a', { href: CURRENT_TARIFF.source }, 'the Alectra page'), '.'))]
+    : [];
   outlet.replaceChildren(
+    ...stale,
     h('section', { class: 'card hero' }, h('h2', {}, head.title), h('p', {}, head.detail)),
     ...(st.notes.length ? [h('section', { class: 'card warn' }, h('ul', {}, ...st.notes.map((n) => h('li', {}, n))))] : []),
     h('section', { class: 'card' }, h('h3', {}, 'What each plan would cost you'), table,
-      h('p', { class: 'fine' }, costNote(CURRENT_RATES.effective))),
+      h('p', { class: 'fine' }, costNote(CURRENT_TARIFF.effective, CURRENT_TARIFF.verified))),
     ...split,
     h('section', { class: 'card' }, h('h3', {}, 'Month by month'), monthlyChart(months), legend),
     h('section', { class: 'card' }, h('h3', {}, 'If you switch'),
@@ -116,3 +121,5 @@ themeBtn.addEventListener('click', () => {
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem('theme', next); } catch { /* private mode: fine */ }
 });
+
+$('prices-note').textContent = `Prices are the OEB's, effective ${CURRENT_TARIFF.effective}, checked ${CURRENT_TARIFF.verified}.`;

@@ -1,0 +1,41 @@
+# Ontario Energy Board price plans as published by Alectra.
+# Update once a year (the OEB resets prices on Nov 1): copy this file to the new effective date, edit the
+# numbers, set `verified` to the day you checked them against `source`, and point src/tariff/current.ts at it.
+effective: "2026-11-01"   # first day these prices apply
+verified: "2026-11-11"    # the day someone last checked every number below against `source`
+source: https://alectrautilities.com/choose-my-rate-option
+
+summer_months: [5, 10]    # May 1 to Oct 31; the rest of the year is winter
+
+# Hours are [from, to) on a 24h clock, in local time. Every table must cover 0-24 exactly once.
+# Prices are cents per kWh.
+plans:
+  tou:
+    prices: { on: 18.9, mid: 14.6, off: 9.1 }
+    weekday:
+      winter:
+        on: [[7, 11], [17, 19]]
+        mid: [[11, 17]]
+        off: [[19, 24], [0, 7]]
+      summer:
+        on: [[11, 17]]
+        mid: [[7, 11], [17, 19]]
+        off: [[19, 24], [0, 7]]
+    weekend_holiday:
+      off: [[0, 24]]
+
+  ulo:
+    prices: { on: 37.7, mid: 14.6, off: 9.1, ul: 3.7 }
+    weekday:
+      winter: &ulo_weekday
+        ul: [[23, 24], [0, 7]]
+        mid: [[7, 16], [21, 23]]
+        on: [[16, 21]]
+      summer: *ulo_weekday   # ULO hours are the same all year
+    weekend_holiday:
+      ul: [[23, 24], [0, 7]]
+      off: [[7, 23]]
+
+  tiered:
+    prices: { tier1: 11.2, tier2: 13.2 }
+    threshold_kwh: { winter: 1000, summer: 600 }   # per month; residential

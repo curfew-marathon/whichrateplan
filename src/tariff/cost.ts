@@ -1,7 +1,7 @@
 import type { IntervalRecord, PlanId } from '../model.ts';
 import { PLAN_IDS } from '../model.ts';
-import type { RateSet } from './rates.ts';
-import { periodOf } from './periods.ts';
+import type { Tariff } from './tariff.ts';
+import { isSummer, periodOf } from './periods.ts';
 
 export interface MonthCost {
   month: string; // 'YYYY-MM'
@@ -15,13 +15,13 @@ export interface MonthCost {
 const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m, 0)).getUTCDate();
 
 /** Tiered billing, with the tier threshold scaled down when the month has missing hours. */
-export function tieredCost(kwh: number, month: number, coverage: number, rates: RateSet): number {
-  const base = month >= 5 && month <= 10 ? rates.tiered.thresholdSummer : rates.tiered.thresholdWinter;
+export function tieredCost(kwh: number, month: number, coverage: number, t: Tariff): number {
+  const base = isSummer(t, month) ? t.tiered.thresholdSummer : t.tiered.thresholdWinter;
   const threshold = base * coverage;
-  return (Math.min(kwh, threshold) * rates.tiered.tier1 + Math.max(0, kwh - threshold) * rates.tiered.tier2) / 100;
+  return (Math.min(kwh, threshold) * t.tiered.tier1 + Math.max(0, kwh - threshold) * t.tiered.tier2) / 100;
 }
 
-export function monthlyCosts(records: IntervalRecord[], rates: RateSet): MonthCost[] {
+export function monthlyCosts(records: IntervalRecord[], tariff: Tariff): MonthCost[] {
   const acc = new Map<string, { kwh: number; hours: number; tou: number; ulo: number }>();
   for (const r of records) {
     if (r.kwh === null) continue;
@@ -31,15 +31,15 @@ export function monthlyCosts(records: IntervalRecord[], rates: RateSet): MonthCo
     const a = acc.get(k) ?? { kwh: 0, hours: 0, tou: 0, ulo: 0 };
     a.kwh += r.kwh;
     a.hours += 1;
-    a.tou += r.kwh * rates.tou[periodOf('tou', y, m, d, h)] / 100;
-    a.ulo += r.kwh * rates.ulo[periodOf('ulo', y, m, d, h)] / 100;
+    a.tou += r.kwh * tariff.tou.prices[periodOf(tariff, 'tou', y, m, d, h)]! / 100;
+    a.ulo += r.kwh * tariff.ulo.prices[periodOf(tariff, 'ulo', y, m, d, h)]! / 100;
     acc.set(k, a);
   }
   return [...acc.keys()].sort().map((month) => {
     const a = acc.get(month)!;
     const y = Number(month.slice(0, 4)), m = Number(month.slice(5, 7));
     const coverage = Math.min(1, a.hours / (daysIn(y, m) * 24));
-    const cost: Record<PlanId, number> = { tiered: tieredCost(a.kwh, m, coverage, rates), tou: a.tou, ulo: a.ulo };
+    const cost: Record<PlanId, number> = { tiered: tieredCost(a.kwh, m, coverage, tariff), tou: a.tou, ulo: a.ulo };
     return { month, kwh: a.kwh, coverage, cost };
   });
 }

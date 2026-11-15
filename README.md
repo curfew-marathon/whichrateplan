@@ -24,8 +24,11 @@ extracted text lines) and register it in `src/adapters/index.ts`. Nothing downst
 
 ## Yearly maintenance (every Nov 1)
 
-The OEB resets prices on Nov 1. Edit `src/tariff/rates.ts` from the Alectra "choose my rate option"
-page, then `npm run check`. Statutory holidays are computed from the OEB's rules and need no update.
+The OEB resets prices on Nov 1. Copy `data/tariffs/<latest>.yaml` to the new effective date, edit the
+prices and hours from the Alectra "choose my rate option" page, set `verified` to the day you checked
+them, and point `src/tariff/current.ts` at the new file. The tests validate the file (hours cover all 24
+with no overlap, every period has a price, dates are real), and the page warns visitors once a Nov 1
+passes without a newer file. Statutory holidays are computed from the OEB's rules and need no update.
 
 ## Tests and real data
 

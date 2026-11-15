@@ -13,11 +13,12 @@ const TOTAL_TOLERANCE = 0.011 * 24;
 const pad = (n: number) => String(n).padStart(2, '0');
 
 function parseDate(token: string): { y: number; m: number; d: number } | null {
-  const [dd, mon, yy] = token.split('-');
-  const m = MONTHS.indexOf((mon ?? '').toLowerCase()) + 1;
-  const d = Number(dd);
-  const y = 2000 + Number(yy);
-  if (!m || !Number.isInteger(d) || !Number.isInteger(y)) return null;
+  // Only called on tokens that already matched DATE_LED, so this always matches.
+  const parts = /^(\d{1,2})-([A-Za-z]{3})-(\d{2})$/.exec(token)!;
+  const m = MONTHS.indexOf(parts[2]!.toLowerCase()) + 1;
+  const d = Number(parts[1]);
+  const y = 2000 + Number(parts[3]);
+  if (!m) return null;
   const check = new Date(Date.UTC(y, m - 1, d));
   if (check.getUTCFullYear() !== y || check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) return null;
   return { y, m, d };
@@ -38,9 +39,9 @@ export function parseAlectraLines(rawLines: string[]): ParseResult {
     const line = normalise(raw);
     if (DATE_LED.test(line)) {
       const [dateTok, ...rest] = line.split(' ');
-      const date = parseDate(dateTok ?? '');
+      const date = parseDate(dateTok!);
       const valid = rest.length === 25 && rest.slice(0, 24).every((t) => t === 'ND' || new RegExp(`^${NUM}$`).test(t)) &&
-        new RegExp(`^${NUM}$`).test(rest[24] ?? '');
+        new RegExp(`^${NUM}$`).test(rest[24]!);
       if (!date || !valid) {
         problems.push(`unparsed row (not a real date, or not 24 readings + Total): "${line.slice(0, 60)}"`);
         continue;

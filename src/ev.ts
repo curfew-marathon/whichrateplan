@@ -63,7 +63,7 @@ export function applyEv(records: IntervalRecord[], opts: EvOptions): IntervalRec
     evByDay.set(day, (evByDay.get(day) ?? 0) + ev[i]!);
   });
   for (const [day, idx] of byDay) {
-    let left = (evByDay.get(day) ?? 0) * opts.scale;
+    let left = evByDay.get(day)! * opts.scale;
     if (left <= 0) continue;
     const slots = idx.filter((i) => Number(records[i]!.start.slice(11, 13)) < 7 && records[i]!.kwh !== null);
     if (slots.length === 0) {

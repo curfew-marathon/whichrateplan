@@ -42,6 +42,15 @@ jobs:
             exit 0
           fi
           if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            # The description comes from this run, so the branch must hold the same proposal. Only the
+            # `verified` date may differ, because it is the day each run happened.
+            git fetch --quiet origin "$BRANCH"
+            for f in "data/tariffs/$EFFECTIVE.yaml" src/tariff/current.ts; do
+              if ! diff <(git show "FETCH_HEAD:$f" | grep -v '^verified: ') <(grep -v '^verified: ' "$f") > /dev/null; then
+                echo "::error::Branch $BRANCH exists without a pull request, and its $f differs from what the page shows now. Delete the branch and run this again."
+                exit 1
+              fi
+            done
             echo "Branch $BRANCH was pushed by an earlier run that did not get as far as a pull request. Opening it now."
           else
             npm run check

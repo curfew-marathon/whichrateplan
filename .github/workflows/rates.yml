@@ -30,15 +30,26 @@ jobs:
           EFFECTIVE: ${{ steps.rates.outputs.effective }}
           BRANCH: rates/${{ steps.rates.outputs.effective }}
         run: |
-          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
-            echo "Branch $BRANCH already exists, so this change has been proposed. Nothing to do."
+          # One proposal per effective date. An open or declined pull request means there is nothing to do,
+          # but a pushed branch with no pull request (creating it failed last time) still gets one.
+          state=$(gh pr list --head "$BRANCH" --state all --json state --jq '.[0].state // "NONE"')
+          if [ "$state" = "MERGED" ]; then
+            echo "::error::The pull request for $BRANCH was merged, but the published prices still differ from the live tariff. Check by hand."
+            exit 1
+          fi
+          if [ "$state" != "NONE" ]; then
+            echo "A pull request for $BRANCH already exists ($state). Nothing to do."
             exit 0
           fi
-          npm run check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c "$BRANCH"
-          git add data/tariffs src/tariff/current.ts
-          git commit -m "Update prices to the rates effective $EFFECTIVE"
-          git push -u origin "$BRANCH"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "Branch $BRANCH was pushed by an earlier run that did not get as far as a pull request. Opening it now."
+          else
+            npm run check
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git switch -c "$BRANCH"
+            git add data/tariffs src/tariff/current.ts
+            git commit -m "Update prices to the rates effective $EFFECTIVE"
+            git push -u origin "$BRANCH"
+          fi
           gh pr create --base main --head "$BRANCH" --title "Update prices to the rates effective $EFFECTIVE" --body-file "$RUNNER_TEMP/rates-pr.md"

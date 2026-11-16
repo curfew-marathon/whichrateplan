@@ -23,6 +23,16 @@ const KEYS = Object.keys(LABELS) as PriceKey[];
 const SECTIONS = ['TOU', 'Tiered', 'ULO'] as const;
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+const DATE = '[A-Z][a-z]+ \\d{1,2}, \\d{4}';
+
+/** "November 01, 2026" -> '2026-11-01', or null if that is not a day on the calendar. */
+function isoDate(written: string): string | null {
+  const [, name, day, year] = /^([A-Za-z]+) (\d+), (\d+)$/.exec(written)!;
+  const iso = `${year}-${String(MONTHS.indexOf(name!) + 1).padStart(2, '0')}-${day!.padStart(2, '0')}`;
+  const d = new Date(`${iso}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso ? iso : null;
+}
+
 export interface PublishedPrices {
   /** The latest "rates from" date the page shows, 'YYYY-MM-DD'. */
   effective: string;
@@ -67,10 +77,16 @@ export function parseAlectraPrices(html: string): PublishedPrices {
   }
   const dates: string[] = [];
   for (const section of SECTIONS) {
-    const m = new RegExp(`Current ${section} Rates[\\s|]*([A-Z][a-z]+) (\\d{1,2}), (\\d{4})`).exec(text);
-    const month = m ? MONTHS.indexOf(m[1]!) + 1 : 0;
-    if (!m || month === 0) errs.push(`no start date found for "Current ${section} Rates"`);
-    else dates.push(`${m[3]}-${String(month).padStart(2, '0')}-${m[2]!.padStart(2, '0')}`);
+    // The whole range must be there and make sense, e.g. "November 01, 2026 - April 30, 2027".
+    const m = new RegExp(`Current ${section} Rates[\\s|]*((${DATE}) ?[-\u2013] ?(${DATE}))`).exec(text);
+    if (!m) {
+      errs.push(`no date range found for "Current ${section} Rates"`);
+      continue;
+    }
+    const start = isoDate(m[2]!);
+    const end = isoDate(m[3]!);
+    if (!start || !end || end <= start) errs.push(`"Current ${section} Rates" has an impossible date range: ${m[1]}`);
+    else dates.push(start);
   }
   if (errs.length) throw new Error(`Could not read the prices from the page (has it been redesigned?):\n - ${errs.join('\n - ')}`);
   // TOU and Tiered restart their date range each season while ULO runs the whole year; the newest start is

@@ -66,8 +66,26 @@ test('a price that cannot be cents per kWh is refused', () => {
 });
 
 test('a page with a missing or unreadable date range is refused', () => {
-  unreadable(page({ dates: { ulo: null } }), /no start date found for "Current ULO Rates"/);
-  unreadable(page({ dates: { tou: 'Nov 01, 2026 - Apr 30, 2027' } }), /no start date found for "Current TOU Rates"/);
+  unreadable(page({ dates: { ulo: null } }), /no date range found for "Current ULO Rates"/);
+  unreadable(page({ dates: { tou: 'Nov 01, 2026 - Apr 30, 2027' } }), /"Current TOU Rates" has an impossible date range: Nov 01, 2026 - Apr 30, 2027/);
+});
+
+// Regression: only the start of the range was read, so a range with no readable end was accepted.
+test('a date range without a readable end is refused', () => {
+  unreadable(page({ dates: { tou: 'November 01, 2027 - unavailable' } }), /no date range found for "Current TOU Rates"/);
+  unreadable(page({ dates: { tiered: 'November 01, 2027' } }), /no date range found for "Current Tiered Rates"/);
+});
+
+// Regression: "November 99, 2027" became the date 2027-11-99, which sorts as far in the future, so a real
+// price change was reported as "not in effect yet" and skipped without an error.
+test('a date range with an impossible day, or one that ends before it starts, is refused', () => {
+  unreadable(page({ dates: { ulo: 'November 99, 2027 - October 31, 2028' } }), /"Current ULO Rates" has an impossible date range: November 99, 2027 - October 31, 2028/);
+  unreadable(page({ dates: { tou: 'November 01, 2027 - February 30, 2028' } }), /"Current TOU Rates" has an impossible date range/);
+  unreadable(page({ dates: { tiered: 'November 01, 2027 - April 30, 2027' } }), /"Current Tiered Rates" has an impossible date range/);
+});
+
+test('a date range written with an en dash or without padding is read', () => {
+  assert.equal(parseAlectraPrices(page({ dates: { ulo: 'December 5, 2026 \u2013 October 31, 2027' } })).effective, '2026-12-05');
 });
 
 test('every problem with a page is reported at once', () => {

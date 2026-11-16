@@ -1,0 +1,44 @@
+name: rates
+# Once a week, compare the prices Alectra publishes with the live tariff file and open a pull request
+# when they differ. Prices only; see scripts/check-rates.ts. A page it cannot read fails the run.
+on:
+  schedule:
+    - cron: '23 12 * * 1' # Mondays, about 7:30 a.m. in Ontario
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: rates
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - id: rates
+        run: node scripts/check-rates.ts
+        env:
+          RATES_PR_BODY: ${{ runner.temp }}/rates-pr.md
+      - name: Open a pull request
+        if: steps.rates.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EFFECTIVE: ${{ steps.rates.outputs.effective }}
+          BRANCH: rates/${{ steps.rates.outputs.effective }}
+        run: |
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "Branch $BRANCH already exists, so this change has been proposed. Nothing to do."
+            exit 0
+          fi
+          npm run check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add data/tariffs src/tariff/current.ts
+          git commit -m "Update prices to the rates effective $EFFECTIVE"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "Update prices to the rates effective $EFFECTIVE" --body-file "$RUNNER_TEMP/rates-pr.md"

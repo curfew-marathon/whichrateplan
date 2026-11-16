@@ -24,7 +24,14 @@ extracted text lines) and register it in `src/adapters/index.ts`. Nothing downst
 
 ## Yearly maintenance (every Nov 1)
 
-The OEB resets prices on Nov 1. Copy `data/tariffs/<latest>.yaml` to the new effective date, edit the
+The `rates` workflow runs every Monday: it reads the prices on the Alectra page, and when they differ from
+the live tariff file it opens a pull request with the new file and `current.ts` pointed at it
+(`node scripts/check-rates.ts` does the same locally). It reads **prices only**, so check the hours and the
+Tiered thresholds by hand before merging, then close and reopen the pull request to run CI on it. If
+Alectra redesigns the page the run fails, and the manual steps below still work. The workflow needs
+"Allow GitHub Actions to create and approve pull requests" switched on under Settings, Actions, General.
+
+By hand: the OEB resets prices on Nov 1. Copy `data/tariffs/<latest>.yaml` to the new effective date, edit the
 prices and hours from the Alectra "choose my rate option" page, set `verified` to the day you checked
 them, and point `src/tariff/current.ts` at the new file. The tests validate the file (hours cover all 24
 with no overlap, every period has a price, dates are real), and the page warns visitors once a Nov 1

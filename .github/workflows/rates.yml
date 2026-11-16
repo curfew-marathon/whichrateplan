@@ -1,0 +1,64 @@
+name: rates
+# Once a week, compare the prices Alectra publishes with the live tariff file and open a pull request
+# when they differ. Prices only; see scripts/check-rates.ts. A page it cannot read fails the run.
+on:
+  schedule:
+    - cron: '23 12 * * 1' # Mondays, about 7:30 a.m. in Ontario
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: rates
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - id: rates
+        run: node scripts/check-rates.ts
+        env:
+          RATES_PR_BODY: ${{ runner.temp }}/rates-pr.md
+      - name: Open a pull request
+        if: steps.rates.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EFFECTIVE: ${{ steps.rates.outputs.effective }}
+          BRANCH: rates/${{ steps.rates.outputs.effective }}
+        run: |
+          # One proposal per effective date. An open or declined pull request means there is nothing to do,
+          # but a pushed branch with no pull request (creating it failed last time) still gets one.
+          state=$(gh pr list --head "$BRANCH" --state all --json state --jq '.[0].state // "NONE"')
+          if [ "$state" = "MERGED" ]; then
+            echo "::error::The pull request for $BRANCH was merged, but the published prices still differ from the live tariff. Check by hand."
+            exit 1
+          fi
+          if [ "$state" != "NONE" ]; then
+            echo "A pull request for $BRANCH already exists ($state). Nothing to do."
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            # The description comes from this run, so the branch must hold the same proposal. Only the
+            # `verified` date may differ, because it is the day each run happened.
+            git fetch --quiet origin "$BRANCH"
+            for f in "data/tariffs/$EFFECTIVE.yaml" src/tariff/current.ts; do
+              if ! diff <(git show "FETCH_HEAD:$f" | grep -v '^verified: ') <(grep -v '^verified: ' "$f") > /dev/null; then
+                echo "::error::Branch $BRANCH exists without a pull request, and its $f differs from what the page shows now. Delete the branch and run this again."
+                exit 1
+              fi
+            done
+            echo "Branch $BRANCH was pushed by an earlier run that did not get as far as a pull request. Opening it now."
+          else
+            npm run check
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git switch -c "$BRANCH"
+            git add data/tariffs src/tariff/current.ts
+            git commit -m "Update prices to the rates effective $EFFECTIVE"
+            git push -u origin "$BRANCH"
+          fi
+          gh pr create --base main --head "$BRANCH" --title "Update prices to the rates effective $EFFECTIVE" --body-file "$RUNNER_TEMP/rates-pr.md"

@@ -2,6 +2,11 @@ name: ci
 on:
   push:
   pull_request:
+# push and pull_request both fire on a PR branch commit, so cancel the
+# duplicate run instead of paying for both.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-latest
